@@ -91,6 +91,8 @@ const Wrapper = styled.div`
     place-items: center;
     color: var(--gray-6);
     font-size: 1.6rem;
+    text-align: center;
+    padding: 1rem;
   }
 
   .details {
@@ -103,11 +105,13 @@ const Wrapper = styled.div`
     justify-content: space-between;
     align-items: baseline;
     gap: 1rem;
+    flex-wrap: wrap;
   }
 
   .title {
     font-family: var(--font-heading);
     font-size: 2.6rem;
+    line-height: 1.2;
   }
 
   .year {
@@ -122,6 +126,7 @@ const Wrapper = styled.div`
 
   .overview {
     font-size: 1.6rem;
+    line-height: 1.6;
   }
 
   .info {
@@ -176,6 +181,8 @@ const Wrapper = styled.div`
     place-items: center;
     color: var(--gray-6);
     font-size: 1.2rem;
+    text-align: center;
+    padding: 0.5rem;
   }
 
   .cast-info {
@@ -206,8 +213,17 @@ const Wrapper = styled.div`
   }
 
   @media (max-width: 900px) {
+    .modal {
+      padding: 1.6rem;
+    }
+
     .main {
       grid-template-columns: 1fr;
+    }
+
+    .poster {
+      max-width: 32rem;
+      margin: 0 auto;
     }
 
     .poster-fallback {
@@ -219,9 +235,55 @@ const Wrapper = styled.div`
     }
   }
 
-  @media (max-width: 500px) {
+  @media (max-width: 768px) {
+    padding: 1rem;
+
+    .modal {
+      max-height: 92vh;
+      padding: 1.2rem;
+    }
+
+    .title {
+      font-size: 2.2rem;
+    }
+
+    .year,
+    .rating {
+      font-size: 1.6rem;
+    }
+
+    .overview {
+      font-size: 1.5rem;
+    }
+
+    .info {
+      font-size: 1.4rem;
+    }
+
+    .section-title {
+      font-size: 1.8rem;
+    }
+
     .cast-grid {
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  @media (max-width: 500px) {
+    .btn {
+      width: 100%;
+    }
+
+    .top-row {
+      justify-content: stretch;
+    }
+
+    .title {
+      font-size: 2rem;
+    }
+
+    .cast-grid {
+      grid-template-columns: repeat(2, 1fr);
     }
   }
 `;

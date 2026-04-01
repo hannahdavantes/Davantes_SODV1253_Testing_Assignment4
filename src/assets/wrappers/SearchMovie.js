@@ -25,10 +25,13 @@ const Wrapper = styled.section`
     color: var(--black);
     outline: none;
     font-family: var(--font-body);
+    box-sizing: border-box;
   }
 
   input {
     flex: 1;
+    min-width: 0;
+    display: block;
   }
 
   select {
@@ -56,6 +59,7 @@ const Wrapper = styled.section`
       background-color 0.2s ease,
       transform 0.1s ease,
       box-shadow 0.1s ease;
+    white-space: nowrap;
   }
 
   .btn-primary {
@@ -106,6 +110,29 @@ const Wrapper = styled.section`
 
     select {
       min-width: unset;
+    }
+
+    .search-form input {
+      height: 5.2rem;
+      padding: 0 1.2rem;
+      font-size: 1.6rem;
+      box-sizing: border-box;
+      display: block;
+    }
+  }
+
+  @media (max-width: 480px) {
+    select,
+    .btn {
+      height: 4rem;
+    }
+
+    select {
+      font-size: 1.4rem;
+    }
+
+    .btn {
+      font-size: 1.3rem;
     }
   }
 `;

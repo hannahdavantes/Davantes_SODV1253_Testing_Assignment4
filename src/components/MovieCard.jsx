@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { FaStar } from "react-icons/fa";
 import Wrapper from "../assets/wrappers/MovieCard";
 
@@ -42,4 +43,5 @@ const MovieCard = ({ movie, onClick }) => {
   );
 };
 
-export default MovieCard;
+//This avoids rerender if props did not change
+export default memo(MovieCard);

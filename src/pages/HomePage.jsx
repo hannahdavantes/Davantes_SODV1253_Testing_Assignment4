@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Wrapper from "../assets/wrappers/HomePage";
 import MovieList from "../components/MovieList";
 import SearchMovie from "../components/SearchMovie";
@@ -26,6 +26,9 @@ const HomePage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    //This cancels the old request when state changes fast
+    const controller = new AbortController();
+
     let url = "";
 
     //Based on the mode state, this will handle which URL will be used to request data
@@ -45,7 +48,7 @@ const HomePage = () => {
     //Fetch the data from the API
     //If not successful, we throw error
     //If successful we get the json as results
-    fetch(url)
+    fetch(url, { signal: controller.signal })
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch movies");
         return res.json();
@@ -65,12 +68,29 @@ const HomePage = () => {
         setMovies(results);
         setTotalPages(Math.min(json.total_pages ?? 1, 500));
       })
-      .catch((err) => setError(err.message))
-      .finally(() => setIsLoading(false));
+      .catch((err) => {
+        //Ignore abort error
+        if (err.name === "AbortError") {
+          return;
+        }
+
+        setError(err.message);
+      })
+      .finally(() => {
+        //Only stop loading if request was not aborted
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
+      });
+
+    //Cleanup request
+    return () => {
+      controller.abort();
+    };
   }, [mode, searchTerm, selectedGenre, page]);
 
   //When is 'search' button is clicked
-  const handleSearch = ({ query, genre }) => {
+  const handleSearch = useCallback(({ query, genre }) => {
     setPage(1);
     setSearchTerm(query);
     setSelectedGenre(genre);
@@ -87,22 +107,33 @@ const HomePage = () => {
     } else {
       setMode("top");
     }
-  };
+  }, []);
 
   //Resets to default state
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
     setMode("top");
     setSearchTerm("");
     setSelectedGenre("");
     setPage(1);
-  };
+  }, []);
 
   //For pagination
   //Makes sure that the pages is between 1 and the actual numbner of pages
-  const handlePageChange = (nextPage) => {
-    const safe = Math.max(1, Math.min(nextPage, totalPages));
-    setPage(safe);
-  };
+  const handlePageChange = useCallback(
+    (nextPage) => {
+      const safe = Math.max(1, Math.min(nextPage, totalPages));
+      setPage(safe);
+    },
+    [totalPages],
+  );
+
+  //This keeps the function stable for MovieList
+  const handleSelectMovie = useCallback(
+    (movie) => {
+      navigate(`/movie/${movie.id}`);
+    },
+    [navigate],
+  );
 
   return (
     <Wrapper>
@@ -118,10 +149,7 @@ const HomePage = () => {
       {error && <p>Error: {error}</p>}
 
       {!isLoading && !error && (
-        <MovieList
-          movies={movies}
-          onSelectMovie={(movie) => navigate(`/movie/${movie.id}`)}
-        />
+        <MovieList movies={movies} onSelectMovie={handleSelectMovie} />
       )}
 
       <Pagination

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import Wrapper from "../assets/wrappers/MovieList";
 import MovieCard from "./MovieCard";
 
@@ -19,4 +20,5 @@ const MovieList = ({ movies, onSelectMovie }) => {
   );
 };
 
-export default MovieList;
+//This avoids rerender if props did not change
+export default memo(MovieList);

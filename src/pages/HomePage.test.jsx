@@ -115,7 +115,7 @@ describe("HomePage", () => {
     });
   });
 
-  it("clears search and goes back to top movies", async () => {
+  it("Clears search and goes back to top movies", async () => {
     globalThis.fetch
       .mockResolvedValueOnce({
         ok: true,

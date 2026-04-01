@@ -23,15 +23,21 @@ const MovieDetailsModal = () => {
   };
 
   useEffect(() => {
+    //This cancels the old request if modal closes fast
+    const controller = new AbortController();
+
     Promise.all([
-      fetch(`https://api.themoviedb.org/3/movie/${id}?api_key=${API_KEY}`).then(
-        (res) => {
-          if (!res.ok) throw new Error("Failed to fetch movie details");
-          return res.json();
-        },
-      ),
+      fetch(`https://api.themoviedb.org/3/movie/${id}?api_key=${API_KEY}`, {
+        signal: controller.signal,
+      }).then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch movie details");
+        return res.json();
+      }),
       fetch(
         `https://api.themoviedb.org/3/movie/${id}/credits?api_key=${API_KEY}`,
+        {
+          signal: controller.signal,
+        },
       ).then((res) => {
         if (!res.ok) throw new Error("Failed to fetch cast");
         return res.json();
@@ -41,8 +47,25 @@ const MovieDetailsModal = () => {
         setMovie(movieJson);
         setCast((creditsJson.cast ?? []).slice(0, 16));
       })
-      .catch((err) => setError(err.message))
-      .finally(() => setIsLoading(false));
+      .catch((err) => {
+        //Ignore abort error
+        if (err.name === "AbortError") {
+          return;
+        }
+
+        setError(err.message);
+      })
+      .finally(() => {
+        //Only stop loading if request was not aborted
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
+      });
+
+    //Cleanup request
+    return () => {
+      controller.abort();
+    };
   }, [id]);
 
   const year = movie?.release_date ? movie.release_date.slice(0, 4) : "—";

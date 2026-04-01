@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import Wrapper from "../assets/wrappers/SearchMovie";
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -10,10 +10,16 @@ const SearchMovie = ({ onSearch, onClear, isLoading }) => {
 
   //This use effect gets the genres from the api and we use this to load the genres into dropdown option when searching movie
   useEffect(() => {
+    //This cancels the request if component unmounts
+    const controller = new AbortController();
+
     const fetchGenres = async () => {
       try {
         const res = await fetch(
           `https://api.themoviedb.org/3/genre/movie/list?api_key=${API_KEY}`,
+          {
+            signal: controller.signal,
+          },
         );
 
         if (!res.ok) {
@@ -23,12 +29,22 @@ const SearchMovie = ({ onSearch, onClear, isLoading }) => {
         const data = await res.json();
         setGenres(data.genres ?? []);
       } catch (error) {
+        //Ignore abort error
+        if (error.name === "AbortError") {
+          return;
+        }
+
         console.error("Error fetching genres:", error);
         setGenres([]);
       }
     };
 
     fetchGenres();
+
+    //Cleanup request
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   const handleSubmit = (e) => {
@@ -94,4 +110,5 @@ const SearchMovie = ({ onSearch, onClear, isLoading }) => {
   );
 };
 
-export default SearchMovie;
+//This avoids rerender if props did not change
+export default memo(SearchMovie);
